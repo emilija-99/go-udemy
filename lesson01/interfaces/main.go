@@ -54,20 +54,11 @@ func (t *TruckElectric) UnloadCargo() error {
 func processTruck(truck TruckInterface) error {
 	fmt.Printf("Processing truck: %+v\n", truck)
 
-	// if truck == (Truck{}) {
-	// 	return fmt.Errorf("TRUCK OBJECT IS EMPTY.")
-	// }
-
-	// if truck.id == "" {
-	// 	return fmt.Errorf("ID NOT FOUND.")
-	// }
-	// error need to be written in small letters
 	if err := truck.LoadCargo(); err != nil {
 		return fmt.Errorf("error loading cargo: %w", err)
 	}
 
-	err := truck.UnloadCargo()
-	if err != nil {
+	if err := truck.UnloadCargo(); err != nil {
 		return fmt.Errorf("error unloading cargo: %w", err)
 	}
 
@@ -76,44 +67,33 @@ func processTruck(truck TruckInterface) error {
 }
 
 func main() {
-	// trucks := []TruckNormal{
-	// 	{id: "truck1"},
-	// 	{id: "truck2"},
-	// 	{id: "truck3"},
-	// 	{id: ""},
-	// 	{},
-	// }
+	nt := TruckNormal{id: "1"}
+	et := TruckElectric{id: "2", cargo: 100, battery: 100}
 
-	// eTruck := []TruckElectric{
-	// 	{id: "eTruck1", cargo: 100, battery: 100},
-	// 	{id: "eTruck2", cargo: 200, battery: 200},
-	// }
+	// empty interface
+	// person := make(map[string]any, 0) same as interface{] introduced in Go 1.18}
+	person := make(map[string]interface{}, 0)
+	person["name"] = "Ema"
+	person["age"] = 25
 
-	err := processTruck(&TruckNormal{id: "1"})
+	age, exists := person["age"].(int) // type assertion
+	if !exists {
+		log.Fatalf("Error: %s", "Age not found")
+		return
+	}
+
+	log.Println("Age: ", age)
+
+	err := processTruck(&nt)
 	if err != nil {
 		log.Fatalf("Error: %s", err)
 	}
-	// for _, truck := range trucks {
-	// 	// Println do not print variable, Printf does
-	// 	fmt.Printf("Truck %s arrived.\n", truck.id)
-	// 	if err := processTruck(&truck); err != nil {
-	// 		// if errors.Is(err, ErrNotImplemented) {
-	// 		// 	fmt.Println("Error: Not implemented")
-	// 		// }
-	// 		// if errors.Is(err, ErrTruckNotFound) {
-	// 		// 	fmt.Println("Error: Truck not found")
-	// 		// }
-	// 		log.Fatalf("Error processing truck: %v", err)
-	// 	}
 
-	// if err != nil {
-	// 	fmt.Println("Error: ", err)
-	// }
-	// processTruck(truck)
-	// }
-
-	err = processTruck(&TruckElectric{id: "2"})
+	err = processTruck(&et)
 	if err != nil {
 		log.Fatalf("Error: %s", err)
 	}
+
+	log.Println("Cargo Normal: ", nt.cargo)
+	log.Println("Cargo Electric: ", et.battery)
 }
