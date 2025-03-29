@@ -1,4 +1,4 @@
-package main
+// package concurencywithchannels
 
 import (
 	"context"
@@ -56,6 +56,8 @@ func processFleet(ctx context.Context, trucks []interface{}) error {
 	errorsChan := make(chan error, len(trucks))
 	// waitGroup.Add(len(trucks));
 
+	// defer close(errorsChan) // close the channel when done
+
 	for _, t := range trucks {
 		waitGroup.Add(1) // increment the wait group
 		// processing go routines
@@ -66,22 +68,14 @@ func processFleet(ctx context.Context, trucks []interface{}) error {
 				errorsChan <- err
 			}
 			waitGroup.Done() // go routine is done
-
 		}(t)
 
 		time.Sleep(50 * time.Millisecond)
 		fmt.Println("Fleet processed")
 	}
 
-	waitGroup.Wait() // wait for all go routines to finish
-	close(errorsChan)
-
-	// select {
-	// case err := <-errorsChan:
-	// 	return err
-	// default:
-	// 	return nil
-	// }
+	waitGroup.Wait()  // wait for all go routines to finish
+	close(errorsChan) // close the channel after all go routines are done
 
 	var errors []error
 	for err := range errorsChan {
@@ -92,6 +86,7 @@ func processFleet(ctx context.Context, trucks []interface{}) error {
 	if len(errors) > 0 {
 		return fmt.Errorf("error processing fleet: %d", len(errors))
 	}
+
 	return nil
 }
 
