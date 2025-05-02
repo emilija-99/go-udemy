@@ -1,0 +1,52 @@
+package main
+
+import (
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+)
+
+type application struct {
+	config config
+}
+type config struct {
+	addr string
+}
+
+func (app *application) mount() *http.ServeMux {
+	r := chi.NewRouter()
+	r.User(middleware.Logger)
+	// r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	w.Write([]byte("OK"))
+	// })
+	// mux := http.NewServeMux()
+
+	// mux.HandleFunc("/v1/health", func(w http.ResponseWriter, r *http.Request) {
+	// 	if r.Method == http.MethodGet {
+	// 		app.healthCheckHandler(w, r)
+	// 	}
+	// })
+
+	// mux.HandleFunc("GET health", app.healthCheckHandler) // not working this way
+
+	r.Route('v1', func(r chi.Router){
+		r.Get("/health", app.healthCheckHandler)
+	})
+	return mux
+}
+func (app *application) run(mux *http.ServeMux) error {
+	srv := &http.Server{
+		Addr:         app.config.addr,
+		Handler:      mux,
+		WriteTimeout: time.Second * 30,
+		ReadTimeout:  time.Second * 10,
+		IdleTimeout:  time.Minute,
+	}
+
+	log.Printf("server run on address: %s ", app.config.addr)
+
+	return srv.ListenAndServe()
+}
