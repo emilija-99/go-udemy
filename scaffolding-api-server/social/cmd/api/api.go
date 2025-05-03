@@ -16,12 +16,15 @@ type config struct {
 	addr string
 }
 
-func (app *application) mount() *http.ServeMux {
+func (app *application) mount() http.Handler {
 	r := chi.NewRouter()
-	r.User(middleware.Logger)
-	// r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	w.Write([]byte("OK"))
-	// })
+	log.Printf("logger: %+v", r)
+	r.Use(middleware.Logger)
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("OK"))
+	})
+
 	// mux := http.NewServeMux()
 
 	// mux.HandleFunc("/v1/health", func(w http.ResponseWriter, r *http.Request) {
@@ -32,12 +35,13 @@ func (app *application) mount() *http.ServeMux {
 
 	// mux.HandleFunc("GET health", app.healthCheckHandler) // not working this way
 
-	r.Route('v1', func(r chi.Router){
+	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
 	})
-	return mux
+
+	return r
 }
-func (app *application) run(mux *http.ServeMux) error {
+func (app *application) run(mux http.Handler) error {
 	srv := &http.Server{
 		Addr:         app.config.addr,
 		Handler:      mux,

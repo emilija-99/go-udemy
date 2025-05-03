@@ -1,3 +1,5 @@
-module githbub.com/emilija-99/go_lang_udemy/scaffolding-api-server/social
+module social
 
 go 1.23.5
+
+require github.com/go-chi/chi/v5 v5.2.1
