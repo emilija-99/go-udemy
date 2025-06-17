@@ -8,5 +8,5 @@ func (app *application) healthCheckHandler(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
 
-	app.store.Posts.Create(r.Context()) 
+	// app.store.Posts.Create(r.Context())
 }
