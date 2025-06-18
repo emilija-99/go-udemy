@@ -3,7 +3,7 @@ name: CI for social project only
 on:
   push:
     paths:
-      - 'scaffolding-api-server/social/**'      # Only runs if something inside social/ changes
+      - 'scaffolding-api-server/social/**'      # Trigger only if files in this folder change
 
 jobs:
   build:
@@ -19,8 +19,8 @@ jobs:
 
     - name: Build
       run: go build -v ./...
-      working-directory: social
+      working-directory: scaffolding-api-server/social
 
     - name: Test
       run: go test -v ./...
-      working-directory: social
+      working-directory: scaffolding-api-server/social
