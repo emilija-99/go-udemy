@@ -35,16 +35,6 @@ func (app *application) mount() http.Handler {
 		w.Write([]byte("OK"))
 	})
 
-	// mux := http.NewServeMux()
-
-	// mux.HandleFunc("/v1/health", func(w http.ResponseWriter, r *http.Request) {
-	// 	if r.Method == http.MethodGet {
-	// 		app.healthCheckHandler(w, r)
-	// 	}
-	// })
-
-	// mux.HandleFunc("GET health", app.healthCheckHandler) // not working this way
-
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
 	})
