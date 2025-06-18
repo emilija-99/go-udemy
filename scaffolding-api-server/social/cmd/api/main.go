@@ -29,7 +29,7 @@ func main() {
 		"postgres://postgres:root@localhost:5432/postgres?sslmode=disable")
 
 	if err != nil {
-		log.Fatalf("❌ migrate.New failed: %v", err)
+		log.Fatalf(" migrate.New failed: %v", err)
 	}
 
 	// Pokreni sve migracije koje nisu primenjene
