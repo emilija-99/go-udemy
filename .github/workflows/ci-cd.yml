@@ -3,7 +3,7 @@ name: CI for social project only
 on:
   push:
     paths:
-      - 'scaffolding-api-server/social'      # Only runs if something inside social/ changes
+      - 'scaffolding-api-server/social/**'      # Only runs if something inside social/ changes
 
 jobs:
   build:
