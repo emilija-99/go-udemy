@@ -1,3 +1,10 @@
+name: CI for social project only
+
+on:
+  push:
+    paths:
+      - 'social/**'      # Only runs if something inside social/ changes
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -5,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Go
+    - name: Setup Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.20'
