@@ -32,7 +32,6 @@ func main() {
 		log.Fatalf(" migrate.New failed: %v", err)
 	}
 
-	// Pokreni sve migracije koje nisu primenjene
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		log.Fatalf("❌ migration failed: %v", err)
 	}
