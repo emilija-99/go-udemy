@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'scaffolding-api-server/social/**'      # Trigger only if files in this folder change
+  pull_request:
+    paths:
+      - 'scaffolding-api-server/social/**'
 
 jobs:
   build:
