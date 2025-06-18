@@ -3,7 +3,7 @@ name: CI for social project only
 on:
   push:
     paths:
-      - 'social/**'      # Only runs if something inside social/ changes
+      - `C:\Users\emari\Documents\udemy_go_backend\go_lang_udemy\scaffolding-api-server\social`      # Only runs if something inside social/ changes
 
 jobs:
   build:
