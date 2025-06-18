@@ -5,6 +5,11 @@ import (
 	"social/internal/db"
 	"social/internal/env"
 	"social/internal/store"
+
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/golang-migrate/migrate/v4/source/github"
 )
 
 // exectable for api server
@@ -18,6 +23,21 @@ func main() {
 			maxIdleTime:  env.GetString("DB_MAX_IDLE_TIME", "15m"),
 		},
 	}
+
+	m, err := migrate.New(
+		"file://../migrate.migrations",
+		"postgres://postgres:root@localhost:5432/postgres?sslmode=disable")
+
+	if err != nil {
+		log.Fatalf("❌ migrate.New failed: %v", err)
+	}
+
+	// Pokreni sve migracije koje nisu primenjene
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatalf("❌ migration failed: %v", err)
+	}
+
+	log.Println("✅ Migrations ran successfully.")
 
 	db, err := db.New(cfg.db.addr, cfg.db.maxOpenConns, cfg.db.maxIdleConns, cfg.db.maxIdleTime)
 
