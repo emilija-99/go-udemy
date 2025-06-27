@@ -12,6 +12,8 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/github"
 )
 
+const version = "0.0.1"
+
 // exectable for api server
 func main() {
 	cfg := config{
@@ -22,6 +24,7 @@ func main() {
 			maxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 30),
 			maxIdleTime:  env.GetString("DB_MAX_IDLE_TIME", "15m"),
 		},
+		env: env.GetString("ENV", "development"),
 	}
 
 	m, err := migrate.New(
@@ -33,10 +36,10 @@ func main() {
 	}
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("❌ migration failed: %v", err)
+		log.Fatalf(" migration failed: %v", err)
 	}
 
-	log.Println("✅ Migrations ran successfully.")
+	log.Println("Migrations ran successfully.")
 
 	db, err := db.New(cfg.db.addr, cfg.db.maxOpenConns, cfg.db.maxIdleConns, cfg.db.maxIdleTime)
 
