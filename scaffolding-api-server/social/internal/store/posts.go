@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/lib/pq"
 )
@@ -22,6 +23,7 @@ type Post struct {
 }
 
 func (s *PostsStore) Create(ctx context.Context, post *Post) error {
+	log.Printf("ctx: %+v %+v", ctx, post)
 	query := `INSERT INTO posts(content, title, user_id, tags)
 	VALUES ($1, $2, $3, $4) RETURNING id, created_at, updated_at`
 	row := s.db.QueryRowContext(ctx, query, post.Context, post.Title, post.UserID, pq.Array(post.Tags))

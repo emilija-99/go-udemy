@@ -1,8 +1,7 @@
-create table posts(
-id integer primary key,
-title text ,
-content text,
-user_id integer references users(id),
-tags text[]
-
+CREATE TABLE posts (
+id bigserial PRIMARY KEY,
+title text NOT NULL,
+user_id bigint NOT NULL,
+content text NOT NULL,
+created_at timestamp(0) with time zone NOT NULL DEFAULT NOW()
 )

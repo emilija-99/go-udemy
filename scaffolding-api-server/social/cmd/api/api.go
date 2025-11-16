@@ -38,13 +38,13 @@ func (app *application) mount() http.Handler {
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
-	})
 
-	// r.Route("/v1", func(r chi.Router) {
-	// 	r.Get("/posts", func(r chi.Router) {
-	// 		r.Post("/", app.createPostHandler)
-	// 	})
-	// })
+		// POST v1/posts/
+		r.Route("/posts", func(r chi.Router) {
+			log.Printf("Logger: %+v", r)
+			r.Post("/", app.createPostHandler)
+		})
+	})
 
 	return r
 }

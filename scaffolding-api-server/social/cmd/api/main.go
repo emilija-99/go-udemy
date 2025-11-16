@@ -16,10 +16,12 @@ const version = "0.0.1"
 
 // exectable for api server
 func main() {
+	dsn := env.GetString("DB_ADDR",
+		"postgres://postgres:root@127.0.0.1:5433/social?sslmode=disable")
 	cfg := config{
-		addr: env.GetString("ADDR", ":8080"),
+		addr: env.GetString("ADDR", ":3000"),
 		db: dbConfig{
-			addr:         env.GetString("DB_ADDR", "postgres://postgres:root@localhost/postgres?sslmode=disable"),
+			addr:         dsn,
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 30),
 			maxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 30),
 			maxIdleTime:  env.GetString("DB_MAX_IDLE_TIME", "15m"),
@@ -29,7 +31,7 @@ func main() {
 
 	m, err := migrate.New(
 		"file://../migrate.migrations",
-		"postgres://postgres:root@localhost:5432/postgres?sslmode=disable")
+		dsn)
 
 	if err != nil {
 		log.Fatalf(" migrate.New failed: %v", err)
