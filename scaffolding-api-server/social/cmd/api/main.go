@@ -17,7 +17,7 @@ const version = "0.0.1"
 // exectable for api server
 func main() {
 	dsn := env.GetString("DB_ADDR",
-		"postgres://postgres:root@127.0.0.1:5433/social?sslmode=disable")
+		"postgres://user:pass@postgres:5432/db?sslmode=disable")
 	cfg := config{
 		addr: env.GetString("ADDR", ":3000"),
 		db: dbConfig{
@@ -29,9 +29,7 @@ func main() {
 		env: env.GetString("ENV", "development"),
 	}
 
-	m, err := migrate.New(
-		"file://../migrate.migrations",
-		dsn)
+	m, err := migrate.New("file:///app/cmd/migrate.migrations", dsn)
 
 	if err != nil {
 		log.Fatalf(" migrate.New failed: %v", err)

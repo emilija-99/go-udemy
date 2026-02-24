@@ -11,9 +11,10 @@ import (
 )
 
 // stop user to corrupt store
+// error occurs if you sed validate:"required, max=100" -> if there are some spaces
 type CreatePostPayload struct {
-	Title   string   `json:"title"`
-	Content string   `json:"content"`
+	Title   string   `json:"title" validate:"required,max=100"`
+	Content string   `json:"content" validate:"required,max=1000"`
 	Tags    []string `json:"tags"`
 }
 
@@ -28,6 +29,10 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if err := Validate.Struct(payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
 	// store contains what is in payload.
 	// create actual post from payload
 	post := &store.Post{
@@ -35,6 +40,11 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		Context: payload.Content,
 		UserID:  1,
 	}
+
+	// if payload.Content == "" {
+	// 	app.badRequestResponse(w, r, fmt.Errorf("error bad requet"))
+	// 	return
+	// }
 
 	ctx := r.Context()
 
