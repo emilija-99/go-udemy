@@ -27,6 +27,5 @@ jobs:
 
     - name: Test with Go
       working-directory: scaffolding-api-server/social
-      run: go test 
-
+      run: go test ./...
   
