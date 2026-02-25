@@ -23,7 +23,6 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 	log.Printf("w,r: %+v r= %+v", w, r)
 	// var post store.Post
 	var payload CreatePostPayload
-	// json like $payload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.statusBadRequest(w, r, err)
 		return
