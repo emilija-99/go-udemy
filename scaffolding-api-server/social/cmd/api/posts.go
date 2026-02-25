@@ -21,7 +21,6 @@ type CreatePostPayload struct {
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
 	// decode json
 	log.Printf("w,r: %+v r= %+v", w, r)
-	// var post store.Post
 	var payload CreatePostPayload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.statusBadRequest(w, r, err)
