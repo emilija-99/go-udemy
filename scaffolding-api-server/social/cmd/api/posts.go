@@ -41,7 +41,7 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		UserID:  1,
 	}
 
-	err := errors.New("Payload is empty!")
+	err := errors.New("Payload is empty! (:")
 	if payload.Content == "" {
 		app.badRequestResponse(w, r, err)
 		return
