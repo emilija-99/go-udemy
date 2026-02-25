@@ -16,14 +16,23 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Setup Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: 'latest'
         cache-dependency-path: scaffolding-api-server/social/go.sum
+    
+    - name: Install dependencies
+      run: go get .
+    
+    - name: Test with Go
+      run: go test -json > TestResults-${{ matrix.go-version }}.json
+      working-directory: scaffolding-api-server/social
+    
     - name: Build
       run: go build -v ./...
       working-directory: scaffolding-api-server/social
 
-    - name: Test
-      run: go test -v ./...
-      working-directory: scaffolding-api-server/social
+    - name: Test with Go
+      run: go test 
+
+  
