@@ -41,10 +41,11 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		UserID:  1,
 	}
 
-	// if payload.Content == "" {
-	// 	app.badRequestResponse(w, r, fmt.Errorf("error bad requet"))
-	// 	return
-	// }
+	err := errors.New("Payload is empty.")
+	if payload.Content == "" {
+		app.badRequestResponse(w, r, err)
+		return
+	}
 
 	ctx := r.Context()
 
