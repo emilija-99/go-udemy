@@ -1,0 +1,6 @@
+-- create new migration in current directory
+ ./migrate.migrations$ migrate create -ext sql -seq create_comment_table
+
+-- output
+./migrate.migrations/000003_create_comment_table.up.sql
+./migrate.migrations/000003_create_comment_table.down.sql

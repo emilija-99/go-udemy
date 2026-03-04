@@ -41,12 +41,10 @@ func (app *application) mount() http.Handler {
 
 		// POST v1/posts/
 		r.Route("/posts", func(r chi.Router) {
-			log.Printf("Logger: %+v", r)
 			r.Post("/", app.createPostHandler)
-
-			r.Route("/{postId}", func(r chi.Router) {
-				r.Get("/", app.getPostHandler)
-			})
+			r.Get("/{postId}", app.getPostHandler)
+			r.Delete("/{postId}", app.deletePostHandler)
+			r.Patch("/{postId}", app.patchPostHandler) // update some properties
 		})
 
 	})
