@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -124,30 +124,69 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 	writeJSON(w, http.StatusOK, "OK")
 }
 
-func (app *application) patchPostHandler(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "postId")
-	id, err := strconv.ParseInt(idParam, 10, 64)
+// func (app *application) patchPostHandler(w http.ResponseWriter, r *http.Request) {
+// 	idParam := chi.URLParam(r, "postId")
+// 	id, err := strconv.ParseInt(idParam, 10, 64)
 
-	if err != nil {
+// 	if err != nil {
+// 		app.statusInternlServerError(w, r, err)
+// 	}
+
+// 	var input store.UpdatePost
+// 	err = json.NewDecoder(r.Body).Decode(&input)
+// 	if err != nil {
+// 		app.badRequestResponse(w, r, err)
+// 		return
+// 	}
+
+// 	err = app.store.Posts.Patch(r.Context(), id, &input)
+// 	if err != nil {
+// 		switch {
+// 		case errors.Is(err, store.ErrNotFound):
+// 			app.statusNotFound(w, r, err)
+// 		default:
+// 			app.statusInternlServerError(w, r, err)
+// 		}
+// 	}
+
+// 	w.WriteHeader(http.StatusNoContent)
+// }
+
+func (app *application) pathcPostHandler(w http.ResponseWriter, r *http.Request) {
+	post := getPostFromCtx(r)
+	if err := writeJSON(w, http.StatusOK, post); err != nil {
 		app.statusInternlServerError(w, r, err)
 	}
+}
+func (app *application) postContextMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		idParam := chi.URLParam(r, "postID")
+		id, err := strconv.ParseInt(idParam, 10, 64)
 
-	var input store.UpdatePost
-	err = json.NewDecoder(r.Body).Decode(&input)
-	if err != nil {
-		app.badRequestResponse(w, r, err)
-		return
-	}
-
-	err = app.store.Posts.Patch(r.Context(), id, &input)
-	if err != nil {
-		switch {
-		case errors.Is(err, store.ErrNotFound):
-			app.statusNotFound(w, r, err)
-		default:
+		if err != nil {
 			app.statusInternlServerError(w, r, err)
+			return
 		}
-	}
 
-	w.WriteHeader(http.StatusNoContent)
+		ctx := r.Context()
+
+		post, err := app.store.Posts.GetById(ctx, id)
+		if err != nil {
+			switch {
+			case errors.Is(err, store.ErrNotFound):
+				app.statusNotFound(w, r, err)
+			default:
+				app.statusInternlServerError(w, r, err)
+			}
+			return
+		}
+
+		ctx = context.WithValue(ctx, "post", post)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func getPostFromCtx(r *http.Request) *store.Post {
+	post, _ := r.Context().Value("post").(*store.Post)
+	return post
 }
