@@ -63,7 +63,7 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := writeJSON(w, http.StatusCreated, post); err != nil {
+	if err := app.jsonResponse(w, http.StatusCreated, post); err != nil {
 		app.statusInternlServerError(w, r, err)
 		return
 	}
@@ -78,7 +78,7 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post.Comments = comments
-	if err := writeJSON(w, http.StatusOK, post); err != nil {
+	if err := app.jsonResponse(w, http.StatusOK, post); err != nil {
 		app.statusInternlServerError(w, r, err)
 		return
 	}
@@ -97,7 +97,7 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.statusBadRequest(w, r, err)
 	}
-	writeJSON(w, http.StatusOK, "OK")
+	app.jsonResponse(w, http.StatusOK, "OK")
 }
 
 // func (app *application) patchPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -130,7 +130,7 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 
 func (app *application) pathcPostHandler(w http.ResponseWriter, r *http.Request) {
 	post := getPostFromCtx(r)
-	if err := writeJSON(w, http.StatusOK, post); err != nil {
+	if err := app.jsonResponse(w, http.StatusOK, post); err != nil {
 		app.statusInternlServerError(w, r, err)
 	}
 }
@@ -163,6 +163,6 @@ func (app *application) postContextMiddleware(next http.Handler) http.Handler {
 }
 
 func getPostFromCtx(r *http.Request) *store.Post {
-	post, _ := r.Context().Value("post").(*store.Post)
+	post, _ := r.Context().Value(postCtx).(*store.Post)
 	return post
 }
