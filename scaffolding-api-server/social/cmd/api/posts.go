@@ -70,7 +70,7 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("parse:%s", chi.URLParam(r, "postId"))
 
 	id, err := strconv.ParseInt(idParam, 10, 64)
-	log.Printf("parse:%d", chi.URLParam(r, "postId"))
+	log.Printf("parse:%s", chi.URLParam(r, "postId"))
 
 	if err != nil {
 		app.statusInternlServerError(w, r, err)
