@@ -11,6 +11,10 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+type postKey string
+
+const postCtx postKey = "post"
+
 // stop user to corrupt store
 // error occurs if you sed validate:"required, max=100" -> if there are some spaces
 type CreatePostPayload struct {
@@ -66,46 +70,18 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "postId")
-	log.Printf("parse:%s", chi.URLParam(r, "postId"))
-
-	id, err := strconv.ParseInt(idParam, 10, 64)
-	log.Printf("parse:%s", chi.URLParam(r, "postId"))
-
-	if err != nil {
-		app.statusInternlServerError(w, r, err)
-		return
-	}
-	ctx := r.Context()
-	post, err := app.store.Posts.GetById(ctx, id)
-	if err != nil {
-		log.Printf("GET BY ID: %x", id)
-		app.statusInternlServerError(w, r, err)
-	}
-
-	if err != nil {
-		switch {
-		case errors.Is(err, store.ErrNotFound):
-			app.statusNotFound(w, r, err)
-		default:
-			app.statusInternlServerError(w, r, err)
-		}
-		return
-	}
-
-	comments, err := app.store.Comments.GetByPostID(ctx, id)
-
+	post := getPostFromCtx(r)
+	comments, err := app.store.Comments.GetByPostID(r.Context(), post.ID)
 	if err != nil {
 		app.statusInternlServerError(w, r, err)
 		return
 	}
 
-	if err == nil {
-		post.Comments = comments
-		log.Printf("Post: %+v", post)
-		writeJSON(w, http.StatusOK, post)
+	post.Comments = comments
+	if err := writeJSON(w, http.StatusOK, post); err != nil {
+		app.statusInternlServerError(w, r, err)
+		return
 	}
-
 }
 
 func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -181,7 +157,7 @@ func (app *application) postContextMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx = context.WithValue(ctx, "post", post)
+		ctx = context.WithValue(ctx, postCtx, post)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
