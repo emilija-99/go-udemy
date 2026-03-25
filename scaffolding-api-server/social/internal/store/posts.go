@@ -15,23 +15,24 @@ type PostsStore struct {
 
 type Post struct {
 	ID        int64     `json:"id"`
-	Context   string    `json:"content"`
+	Context   string    `json:"context"`
 	Title     string    `json:"title"`
 	UserID    int64     `json:"user_id"`
 	Tags      []string  `json:"tags"`
 	CreatedAt string    `json:"created_at"`
 	UpdatedAt string    `json:"updated_at"`
 	Comments  []Comment `json:"comments"`
+	Version   int64     `json:"version"`
 }
 type UpdatePost struct {
-	Context *string   `json:"content"`
+	Context *string   `json:"context"`
 	Title   *string   `json:"title"`
 	Tags    *[]string `json:"tags"`
 }
 
 func (s *PostsStore) Create(ctx context.Context, post *Post) error {
 	log.Printf("ctx: %+v %+v", ctx, post)
-	query := `INSERT INTO posts(content, title, user_id, tags)
+	query := `INSERT INTO posts(context, title, user_id, tags)
 	VALUES ($1, $2, $3, $4) RETURNING id, created_at, updated_at`
 	row := s.db.QueryRowContext(ctx, query, post.Context, post.Title, post.UserID, pq.Array(post.Tags))
 	err := row.Scan(
@@ -48,7 +49,7 @@ func (s *PostsStore) Create(ctx context.Context, post *Post) error {
 
 func (s *PostsStore) GetById(ctx context.Context, id int64) (*Post, error) {
 	log.Printf("%+v - %+v", ctx, id)
-	query := `SELECT id, user_id, title, content, created_at, updated_at, tags
+	query := `SELECT id, user_id, title, context, created_at, updated_at, tags, version
 	FROM posts
 	WHERE id = $1`
 
@@ -61,6 +62,7 @@ func (s *PostsStore) GetById(ctx context.Context, id int64) (*Post, error) {
 		&post.CreatedAt,
 		&post.UpdatedAt,
 		pq.Array(&post.Tags),
+		&post.Version,
 	)
 
 	if err != nil {
@@ -77,6 +79,7 @@ func (s *PostsStore) GetById(ctx context.Context, id int64) (*Post, error) {
 }
 
 func (s *PostsStore) Delete(ctx context.Context, id int64) error {
+	log.Printf("Id: %d", id)
 	query := `DELETE FROM posts WHERE id=$1`
 	result, err := s.db.ExecContext(ctx, query, id)
 
@@ -102,36 +105,41 @@ func (s *PostsStore) Delete(ctx context.Context, id int64) error {
 
 	return nil
 }
-func (s *PostsStore) Patch(ctx context.Context, id int64, post *UpdatePost) error {
+func (s *PostsStore) Patch(ctx context.Context, post *Post) error {
+	log.Printf("post: %+v ctx: %+v", post, ctx)
 	query := `
 	UPDATE posts
-	SET
-			title = COALESCE($1, title),
-            content = COALESCE($2, content),
-            tags    = COALESCE($3, tags)
-	WHERE id=$4`
-
-	log.Printf("id=%d post=%+v", id, post)
+SET title = $1,
+    context = $2,
+    tags = $3,
+    version = version + 1
+WHERE id = $4
+RETURNING version
+	`
 
 	var tags interface{}
+
 	if post.Tags != nil {
 		tags = pq.Array(post.Tags)
 	} else {
 		tags = nil
 	}
+
 	log.Printf("tags=%v", tags)
-	result, err := s.db.ExecContext(ctx, query, post.Title, post.Context, tags, id)
+
+	err := s.db.QueryRowContext(ctx, query,
+		post.Title,
+		post.Context,
+		pq.Array(post.Tags),
+		post.ID,
+	).Scan(&post.Version)
 	if err != nil {
-		return err
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrNotFound
+		default:
+			return err
+		}
 	}
-
-	log.Printf("result: %s", result)
-
-	rows, _ := result.RowsAffected()
-	if rows == 0 {
-		return ErrNotFound
-	}
-	log.Printf("rows: %d", rows)
-
 	return nil
 }

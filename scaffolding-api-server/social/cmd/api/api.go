@@ -42,11 +42,11 @@ func (app *application) mount() http.Handler {
 		// POST v1/posts/
 		r.Route("/posts", func(r chi.Router) {
 			r.Post("/", app.createPostHandler)
-			r.Route("/{postId}", func(r chi.Router) {
+			r.Route("/{postID}", func(r chi.Router) {
 				r.Use(app.postContextMiddleware)
 				r.Get("/", app.getPostHandler)
 				r.Delete("/", app.deletePostHandler)
-				r.Patch("/", app.pathcPostHandler) // update some properties
+				r.Patch("/", app.patchPostHandler) // update some properties
 			})
 		})
 	})
