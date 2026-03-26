@@ -34,6 +34,10 @@ func (s *PostsStore) Create(ctx context.Context, post *Post) error {
 	log.Printf("ctx: %+v %+v", ctx, post)
 	query := `INSERT INTO posts(context, title, user_id, tags)
 	VALUES ($1, $2, $3, $4) RETURNING id, created_at, updated_at`
+
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeout)
+	defer cancel()
+
 	row := s.db.QueryRowContext(ctx, query, post.Context, post.Title, post.UserID, pq.Array(post.Tags))
 	err := row.Scan(
 		&post.ID,
@@ -52,6 +56,9 @@ func (s *PostsStore) GetById(ctx context.Context, id int64) (*Post, error) {
 	query := `SELECT id, user_id, title, context, created_at, updated_at, tags, version
 	FROM posts
 	WHERE id = $1`
+
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeout)
+	defer cancel()
 
 	var post Post
 	err := s.db.QueryRowContext(ctx, query, id).Scan(
@@ -83,6 +90,9 @@ func (s *PostsStore) Delete(ctx context.Context, id int64) error {
 	query := `DELETE FROM posts WHERE id=$1`
 	result, err := s.db.ExecContext(ctx, query, id)
 
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeout)
+	defer cancel()
+
 	if err != nil {
 		return err
 	}
@@ -109,13 +119,16 @@ func (s *PostsStore) Patch(ctx context.Context, post *Post) error {
 	log.Printf("post: %+v ctx: %+v", post, ctx)
 	query := `
 	UPDATE posts
-SET title = $1,
-    context = $2,
-    tags = $3,
-    version = version + 1
-WHERE id = $4
-RETURNING version
+	SET title = $1,
+	    context = $2,
+	    tags = $3,
+	    version = version + 1
+	WHERE id = $4
+	RETURNING version
 	`
+
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeout)
+	defer cancel()
 
 	var tags interface{}
 
